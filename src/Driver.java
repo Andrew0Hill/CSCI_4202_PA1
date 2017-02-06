@@ -9,8 +9,12 @@ public class Driver {
         Game game;
         try {
             game = parser.parseFromFile(args[0]);
+            if(game != null && game.validate()){
+                System.out.println("Valid game received.");
+            }
         }catch(FileNotFoundException ex){
             System.out.println("File not found. Please try again.");
         }
+
     }
 }
