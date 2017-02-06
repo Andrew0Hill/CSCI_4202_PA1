@@ -3,7 +3,11 @@
  */
 public class State {
     int[][] state;
+    int dim;
+    int zeroRow = 0;
+    int zeroCol = 0;
     boolean isValid(int n){
+        dim = n;
         //Check length of both dimensions of array.
         if(state.length != n || state[0].length != n){
             return false;
@@ -21,6 +25,17 @@ public class State {
                 return false;
             }
         }
+        getZeroPos();
         return true;
+    }
+    public void getZeroPos(){
+        for(int i = 0; i < dim; ++i){
+            for(int n = 0; n < dim; ++n){
+                if(state[i][n] == 0){
+                    zeroRow = i;
+                    zeroCol = n;
+                }
+            }
+        }
     }
 }
