@@ -6,12 +6,14 @@ import com.google.gson.stream.JsonReader;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PipedInputStream;
 
 public class JSON_Parse {
     public Game parseFromFile(String filename) throws FileNotFoundException{
         Gson gson = new Gson();
         JsonReader input = new JsonReader(new FileReader(filename));
+        // Return the new Game class.
         return gson.fromJson(input,Game.class);
     }
 }
