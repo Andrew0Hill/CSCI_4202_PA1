@@ -18,7 +18,7 @@ public class Driver {
             System.out.println("File not found. Please try again.");
         }
         Player p = new Player();
-        p.getApplicableMoves(s);
+        ArrayList<int[]> possibleMoves = p.getApplicableMoves(s);
     }
 
 }
