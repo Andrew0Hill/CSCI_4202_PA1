@@ -74,4 +74,11 @@ public class State {
             }
         }
     }
+
+    public void print() {
+        for(int[] row: this.state){
+            System.out.println(Arrays.toString(row));
+        }
+        System.out.println();
+    }
 }

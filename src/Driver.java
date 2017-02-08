@@ -18,14 +18,10 @@ public class Driver {
             //p.printGameState(game.start);
             p.playGame(game);
             System.out.println("Solution found in:" + p.previous_moves.size());
-            for(State s : p.previous_moves){
-                p.printGameState(s);
-            }
+            p.previous_moves.forEach(State::print);
             p.playGameIterative(game);
             System.out.println("Solution found in:" + p.previous_moves.size());
-            for(State s: p.previous_moves){
-                p.printGameState(s);
-            }
+            p.previous_moves.forEach(State::print);
         }catch(FileNotFoundException ex){
             System.out.println("File not found. Please try again.");
         }

@@ -12,8 +12,12 @@ public class Player {
     public boolean checkRule(iRule r, State s){
         return r.isApplicable(s);
     }
-    public ArrayList<int[]> getApplicableMoves(State s){
-        ArrayList<int[]> moves = new ArrayList<>();
+
+    // Gets the moves applicable to State s.
+    // Returns an ArrayList<> of int[].
+    // Each int[] is size 2 and contains the offset for a move.
+    public ArrayList<Offset> getApplicableMoves(State s){
+        ArrayList<Offset> moves = new ArrayList<>();
         if(checkRule(RuleSet::down,s)){
             moves.add(Move.DOWN);
         }
@@ -28,13 +32,13 @@ public class Player {
         }
         return moves;
     }
-    public State executeMove(int[] move, State s){
+    public State executeMove(Offset diff, State s){
         State newState = new State(s);
-        int tempVal = newState.state[newState.zeroRow+move[0]][newState.zeroCol+move[1]];
-        newState.state[newState.zeroRow+move[0]][newState.zeroCol+move[1]] = 0;
+        int tempVal = newState.state[newState.zeroRow+diff.row][newState.zeroCol+diff.col];
+        newState.state[newState.zeroRow+diff.row][newState.zeroCol+diff.col] = 0;
         newState.state[newState.zeroRow][newState.zeroCol] = tempVal;
-        newState.zeroRow = newState.zeroRow+move[0];
-        newState.zeroCol = newState.zeroCol+move[1];
+        newState.zeroRow = newState.zeroRow+diff.row;
+        newState.zeroCol = newState.zeroCol+diff.col;
         return newState;
     }
     public boolean playGame(Game g){
@@ -65,21 +69,28 @@ public class Player {
             System.out.println("Solution found in: "+ prev_moves.size());
             return true;
         }else{
-            // For each candidate move in the move set:
+            // Get the most recent move.
             State lastMove = prev_moves.getLast();
-            ArrayList<int[]> moves = getApplicableMoves(lastMove);
-            for(int[] candidate : moves){
+            // Get moves applicable to this state.
+            ArrayList<Offset> moves = getApplicableMoves(lastMove);
+            // Run for each Candidate move in the "moves" list.
+            for(Offset candidate : moves){
+                // Execute the move on the lastMove state.
                 State new_state = executeMove(candidate,lastMove);
+                // Check that the new state hasn't already been visited
                 if(!prev_moves.contains(new_state)) {
+                    // Add the new move to the moves list.
                     prev_moves.add(new_state);
-                    //printGameState(new_state);
+                    // Call the function recursively.
                     if (playGame(prev_moves, target,depthBound)) {
                         return true;
                     }else{
+                        // If the function returns false, remove the last move, and go to the next one.
                         prev_moves.removeLast();
                     }
                 }
             }
+            // Return false if all moves at this level are tried without a solution.
             return false;
         }
     }
