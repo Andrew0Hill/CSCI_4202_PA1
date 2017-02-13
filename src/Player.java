@@ -6,6 +6,7 @@ import java.util.*;
  */
 public class Player {
     public LinkedList<State> previous_moves;
+    int considered_states = 0;
     Player(){
         previous_moves = new LinkedList<>();
     }
@@ -42,21 +43,27 @@ public class Player {
         return newState;
     }
     public boolean playGame(Game g){
+        considered_states = 0;
         previous_moves.clear();
         previous_moves.add(g.start);
         return playGame(previous_moves,g.goal,30);
     }
     public boolean playGameIterative(Game g){
+        considered_states = 0;
         previous_moves.clear();
         previous_moves.add(g.start);
         int bound = 1;
         while(bound < 30 && !playGame(previous_moves,g.goal,bound)){
-            System.out.println("Iterative Backtracking at Depth: " + bound);
+            //System.out.println("Iterative Backtracking at Depth: " + bound);
             previous_moves.clear();
             previous_moves.add(g.start);
             ++bound;
         }
-        return true;
+        if(bound == 30){
+            return false;
+        }else {
+            return true;
+        }
     }
     public boolean playGame(LinkedList<State> prev_moves, State target,int depthBound){
 
@@ -66,10 +73,10 @@ public class Player {
         // We have found the correct path. End here.
         if(prev_moves.peekLast().equals(target)){
             //printGameState(prev_moves.peekLast());
-            System.out.println("Solution found in: "+ prev_moves.size());
+            //System.out.println("Solution found in: "+ prev_moves.size());
             return true;
         }else{
-            // Get the most recent move.
+            // For each candidate move in the move set:
             State lastMove = prev_moves.getLast();
             // Get moves applicable to this state.
             ArrayList<Offset> moves = getApplicableMoves(lastMove);
@@ -77,7 +84,7 @@ public class Player {
             for(Offset candidate : moves){
                 // Execute the move on the lastMove state.
                 State new_state = executeMove(candidate,lastMove);
-                // Check that the new state hasn't already been visited
+                ++considered_states;
                 if(!prev_moves.contains(new_state)) {
                     // Add the new move to the moves list.
                     prev_moves.add(new_state);
