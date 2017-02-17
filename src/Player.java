@@ -55,6 +55,7 @@ public class Player {
         generated_states = 0;
         previous_moves.clear();
         previous_moves.add(g.start);
+
         int bound = 1;
         while(bound < 30 && !playGame(previous_moves,g.goal,bound)){
             //System.out.println("Iterative Backtracking at Depth: " + bound);
@@ -121,6 +122,7 @@ public class Player {
         while(!open.isEmpty()){
 
             Node current = open.remove();
+            closed.add(current);
             State gamestate = current.data;
             if(current.data.equals(g.goal)){
                 Stack<Node> reverse = new Stack<>();
@@ -139,10 +141,10 @@ public class Player {
                     ++considered_states;
                     State temp = executeMove(candidate,gamestate);
                     Node tNode = new Node(temp);
-                    if(!closed.contains(tNode)){
+                    if(!closed.contains(tNode) && !open.contains(tNode)){
                         ++generated_states;
                         tNode.parent = current;
-                        closed.add(tNode);
+                        //closed.add(tNode);
                         open.add(tNode);
                     }
                 }
@@ -151,16 +153,49 @@ public class Player {
         return false;
     }
 
-    public boolean playGameA(Game g){
+    public boolean playGameA(Game g, iHeuristic heuristic){
         considered_states = 0;
         generated_states = 0;
         previous_moves.clear();
         previous_moves.add(g.start);
 
-        Node n = new Node(g.start);
-
+        Node n = new Node(g.start,0,heuristic.evaluate(g.start,g.goal));
         HashSet<Node> closed = new HashSet<>();
-        return true;
+        PriorityQueue<Node> queue = new PriorityQueue<>(new NodeComparator());
+        queue.add(n);
+        while(!queue.isEmpty()){
+            Node current = queue.remove();
+            closed.add(current);
+            State gamestate = current.data;
+            if(current.data.equals(g.goal)){
+                Stack<Node> reverse = new Stack<>();
+                while(current!= n){
+                    reverse.add(current);
+                    current = current.parent;
+                }
+                while(!reverse.isEmpty()){
+                    previous_moves.add(reverse.pop().data);
+                }
+                return true;
+            }else{
+                ArrayList<Offset> moves = getApplicableMoves(gamestate);
+
+                for(Offset candidate : moves){
+                    ++considered_states;
+                    State temp = executeMove(candidate,gamestate);
+                    Node tNode = new Node(temp);
+                    if(!closed.contains(tNode) && !queue.contains(tNode)){
+                        ++generated_states;
+                        tNode.parent = current;
+                        tNode.depth = current.depth+1;
+                        tNode.cost = heuristic.evaluate(tNode.data,g.goal);
+                        //closed.add(tNode);
+                        queue.add(tNode);
+                    }
+                }
+            }
+        }
+        return false;
     }
     public void printGameState(State s){
         for(int[] row: s.state){
