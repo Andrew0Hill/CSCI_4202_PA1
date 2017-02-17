@@ -7,6 +7,7 @@ import java.util.*;
 public class Player {
     public LinkedList<State> previous_moves;
     int considered_states = 0;
+    int generated_states = 0;
     Player(){
         previous_moves = new LinkedList<>();
     }
@@ -44,12 +45,14 @@ public class Player {
     }
     public boolean playGame(Game g){
         considered_states = 0;
+        generated_states = 0;
         previous_moves.clear();
         previous_moves.add(g.start);
         return playGame(previous_moves,g.goal,30);
     }
     public boolean playGameIterative(Game g){
         considered_states = 0;
+        generated_states = 0;
         previous_moves.clear();
         previous_moves.add(g.start);
         int bound = 1;
@@ -82,10 +85,11 @@ public class Player {
             ArrayList<Offset> moves = getApplicableMoves(lastMove);
             // Run for each Candidate move in the "moves" list.
             for(Offset candidate : moves){
+                ++considered_states;
                 // Execute the move on the lastMove state.
                 State new_state = executeMove(candidate,lastMove);
-                ++considered_states;
                 if(!prev_moves.contains(new_state)) {
+                    ++generated_states;
                     // Add the new move to the moves list.
                     prev_moves.add(new_state);
                     // Call the function recursively.
@@ -100,6 +104,63 @@ public class Player {
             // Return false if all moves at this level are tried without a solution.
             return false;
         }
+    }
+    public boolean playGameGraphSearch(Game g){
+        considered_states = 0;
+        generated_states = 0;
+        previous_moves.clear();
+        previous_moves.add(g.start);
+
+        Node n = new Node(g.start);
+
+        HashSet<Node> closed = new HashSet<>();
+        Deque<Node> open = new ArrayDeque<>();
+
+        open.add(n);
+
+        while(!open.isEmpty()){
+
+            Node current = open.remove();
+            State gamestate = current.data;
+            if(current.data.equals(g.goal)){
+                Stack<Node> reverse = new Stack<>();
+                while(current!= n){
+                    reverse.add(current);
+                    current = current.parent;
+                }
+                while(!reverse.isEmpty()){
+                    previous_moves.add(reverse.pop().data);
+                }
+                return true;
+            }else{
+                ArrayList<Offset> moves = getApplicableMoves(gamestate);
+
+                for(Offset candidate : moves){
+                    ++considered_states;
+                    State temp = executeMove(candidate,gamestate);
+                    Node tNode = new Node(temp);
+                    if(!closed.contains(tNode)){
+                        ++generated_states;
+                        tNode.parent = current;
+                        closed.add(tNode);
+                        open.add(tNode);
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean playGameA(Game g){
+        considered_states = 0;
+        generated_states = 0;
+        previous_moves.clear();
+        previous_moves.add(g.start);
+
+        Node n = new Node(g.start);
+
+        HashSet<Node> closed = new HashSet<>();
+        return true;
     }
     public void printGameState(State s){
         for(int[] row: s.state){
