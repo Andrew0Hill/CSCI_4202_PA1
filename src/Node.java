@@ -12,10 +12,10 @@ public class Node {
     Node(State s){
         data = new State(s);
     }
-    Node(State s, int dp, int cst){
+    Node(State s, int dp, Node pt){
         data = new State(s);
         depth = dp;
-        cost = cst;
+        parent = pt;
     }
     @Override
     public boolean equals(Object o){
