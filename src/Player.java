@@ -107,65 +107,7 @@ public class Player {
         }
     }
     public boolean playGameGraphSearch(Game g){
-        considered_states = 0;
-        generated_states = 0;
-        previous_moves.clear();
-        previous_moves.add(g.start);
-        // Key-Value map for <Node,Cost(Node)>
-        HashMap<Node,Integer> visited = new HashMap<>();
-        ArrayDeque<Node> unvisited = new ArrayDeque<>();
-
-        // Node for the starting position in our game.
-        // It has a State of g.start, and a depth of 0.
-        Node head = new Node(g.start,0,null);
-        unvisited.add(head);
-        while(!unvisited.isEmpty()){
-            // Get the first Node in the Queue
-            Node current = unvisited.removeFirst();
-            if(current.data.equals(g.goal)){
-                System.out.println("Solution found.");
-                return true;
-            }
-            ArrayList<Offset> moves = getApplicableMoves(current.data);
-
-            for(Offset candidate : moves){
-                // Try a new move from the set of valid moves.
-                State newState = executeMove(candidate,current.data);
-                // New Node, with the corresponding state added, a depth of current+1, and a parent of "current"
-                Node newNode = new Node(newState,current.depth+1,current);
-
-                // Node is brand new, it isn't in either the known visited or unvisited node sets.
-                if(!visited.containsKey(newNode) && !unvisited.contains(newNode)){
-                    unvisited.add(newNode);
-                }
-                // This node is visited before. We should check if it can offer a cheaper cost this time.
-                else if(visited.containsKey(newNode)){
-                    if(visited.get(newNode) > newNode.depth) {
-                        // Replace the node with our newNode.
-                        /*
-                        Note: The Hash function for Node is designed so that only the "board state"
-                        is a member of the hash. This means that even we're using newNode as a key in our HashMap,
-                        the values of all other members of the HashMap's matching Node can differ from ours. By
-                        replacing the Node in the HashMap with out NewNode, we "update" the values of all the Node's
-                        members (in this case, the "predecessor" reference.
-                         */
-                        visited.put(newNode, newNode.depth);
-                    }
-                }
-                // This node is currently on our unvisited stack. We don't need to visit twice, so we'll check if it
-                // offers a lower cost this time and update it if so.
-                else if(unvisited.contains(newNode)){
-                    for(Node n : unvisited){
-                        if(n.equals(newNode) && n.depth > ){
-                        }
-                    }
-                }
-            }
-
-
-
-
-        }
+return true;
     }
 
     public boolean playGameA(Game g, iHeuristic heuristic){
@@ -173,8 +115,56 @@ public class Player {
         generated_states = 0;
         previous_moves.clear();
         previous_moves.add(g.start);
+        // Key-Value map for <Node,Cost(Node)>
+        HashMap<Node,Integer> cost = new HashMap<>();
+        PriorityQueue<Node> unvisited = new PriorityQueue<>(new NodeComparator());
+        HashSet<Node> unvisited_set = new HashSet<>();
+        HashSet<Node> visited = new HashSet<>();
+        // Node for the starting position in our game.
+        // It has a State of g.start, and a depth of 0.
+        Node head = new Node(g.start,0,null);
+        unvisited.add(head);
+        cost.put(head,heuristic.evaluate(g.start,g.goal));
 
 
+        while(!unvisited.isEmpty()){
+            Node current = unvisited.remove();
+            visited.add(current);
+
+            if(current.data.equals(g.goal)){
+                System.out.println("Goal Found");
+                Stack<State> temp = new Stack<>();
+                while(current.parent != null){
+                    temp.add(current.data);
+                    current = current.parent;
+                }
+                while(!temp.isEmpty()){
+                    previous_moves.add(temp.pop());
+                }
+                return true;
+            }
+            ArrayList<Offset> valid_moves = getApplicableMoves(current.data);
+
+            for(Offset o : valid_moves){
+                ++considered_states;
+                State successor = executeMove(o,current.data);
+                Node tempNode = new Node(successor,current.depth+1,current);
+                tempNode.cost = tempNode.depth + heuristic.evaluate(tempNode.data,g.goal);
+
+                if(visited.contains(tempNode) && cost.get(tempNode) > tempNode.cost){
+                    visited.remove(tempNode);
+                }
+                if(unvisited.contains(tempNode) && cost.get(tempNode) > tempNode.cost){
+                    unvisited.remove(tempNode);
+                }
+                if(!visited.contains(tempNode) && !unvisited_set.contains(tempNode)){
+                    ++generated_states;
+                    cost.put(tempNode,tempNode.depth+heuristic.evaluate(tempNode.data,g.goal));
+                    unvisited.add(tempNode);
+                }
+            }
+        }
+        return false;
     }
     public void printGameState(State s){
         for(int[] row: s.state){

@@ -65,7 +65,7 @@ public class Driver {
 
             Graph Search Start
              */
-            System.out.println("Beginning Graph Search:");
+/*            System.out.println("Beginning Graph Search:");
 
             System.out.println("Start:");
             p.printGameState(game.start);
@@ -81,7 +81,7 @@ public class Driver {
                 }
             } else {
                 System.out.println("Error: Solution not found.");
-            }
+            }*/
             /*
             Graph Search End
 
