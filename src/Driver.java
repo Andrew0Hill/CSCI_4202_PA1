@@ -50,7 +50,7 @@ public class Driver {
             System.out.println("Goal:");
             p.printGameState(game.goal);
 
-            if (p.playGameIterative(game)) {
+            if (p.playGameIterative(game,31)) {
                 System.out.println("Optimal Solution found in: " + (p.previous_moves.size() - 1) + " moves.");
                 System.out.println("Generated States: " + p.generated_states);
                 System.out.println("Considered States: " + p.considered_states);
