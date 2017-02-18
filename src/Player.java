@@ -111,18 +111,16 @@ public class Player {
         generated_states = 0;
         previous_moves.clear();
         previous_moves.add(g.start);
-
         Node n = new Node(g.start);
-
-        HashSet<Node> closed = new HashSet<>();
+        HashMap<Node,Integer> closed_list = new HashMap<>();
         Deque<Node> open = new ArrayDeque<>();
-
+        HashSet<Node> quick_open = new HashSet<>();
         open.add(n);
 
         while(!open.isEmpty()){
-
             Node current = open.remove();
-            closed.add(current);
+            quick_open.remove(current);
+            closed_list.put(current,current.depth);
             State gamestate = current.data;
             if(current.data.equals(g.goal)){
                 Stack<Node> reverse = new Stack<>();
@@ -136,16 +134,20 @@ public class Player {
                 return true;
             }else{
                 ArrayList<Offset> moves = getApplicableMoves(gamestate);
-
                 for(Offset candidate : moves){
                     ++considered_states;
                     State temp = executeMove(candidate,gamestate);
                     Node tNode = new Node(temp);
-                    if(!closed.contains(tNode) && !open.contains(tNode)){
+                    if(!closed_list.containsKey(tNode) && !quick_open.contains(tNode)){
                         ++generated_states;
                         tNode.parent = current;
-                        //closed.add(tNode);
                         open.add(tNode);
+                        quick_open.add(tNode);
+                    }else if(closed_list.containsKey(tNode)){
+                        if(closed_list.get(tNode) > tNode.depth){
+                            System.out.println("Shorter Path Found");
+                            closed_list.replace(tNode,tNode.depth);
+                        }
                     }
                 }
             }
@@ -160,12 +162,13 @@ public class Player {
         previous_moves.add(g.start);
 
         Node n = new Node(g.start,0,heuristic.evaluate(g.start,g.goal));
-        HashSet<Node> closed = new HashSet<>();
-        PriorityQueue<Node> queue = new PriorityQueue<>(new NodeComparator());
-        queue.add(n);
-        while(!queue.isEmpty()){
-            Node current = queue.remove();
-            closed.add(current);
+        HashMap <Node,Integer> closed_set = new HashMap<>();
+        PriorityQueue<Node> open_queue = new PriorityQueue<>(new NodeComparator());
+        HashSet<Node> quick_open = new HashSet<>();
+        open_queue.add(n);
+        while(!open_queue.isEmpty()){
+            Node current = open_queue.remove();
+            quick_open.remove(current);
             State gamestate = current.data;
             if(current.data.equals(g.goal)){
                 Stack<Node> reverse = new Stack<>();
@@ -178,20 +181,26 @@ public class Player {
                 }
                 return true;
             }else{
+                closed_set.put(current,current.depth+current.cost);
                 ArrayList<Offset> moves = getApplicableMoves(gamestate);
 
                 for(Offset candidate : moves){
                     ++considered_states;
                     State temp = executeMove(candidate,gamestate);
                     Node tNode = new Node(temp);
-                    if(!closed.contains(tNode) && !queue.contains(tNode)){
+                    if(!closed_set.containsKey(tNode) && !quick_open.contains(tNode)){
                         ++generated_states;
                         tNode.parent = current;
                         tNode.depth = current.depth+1;
                         tNode.cost = heuristic.evaluate(tNode.data,g.goal);
                         //closed.add(tNode);
-                        queue.add(tNode);
-                    }
+                        open_queue.add(tNode);
+                        quick_open.add(tNode);
+                    }/*else if(closed_set.containsKey(tNode)){
+                        if(closed_set.get(tNode) > (tNode.depth + tNode.cost)){
+                            closed_set.replace(tNode,(tNode.depth+tNode.cost));
+                        }
+                    }*/
                 }
             }
         }

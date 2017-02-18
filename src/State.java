@@ -81,4 +81,8 @@ public class State {
         }
         System.out.println();
     }
+    @Override
+    public int hashCode(){
+        return Arrays.deepHashCode(state);
+    }
 }

@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Created by Andrew on 2/17/2017.
@@ -28,5 +29,9 @@ public class Node {
 
         // Return true if the State held in this node is equal to the state held in another node.
         return (n.data.equals(this.data));
+    }
+    @Override
+    public int hashCode(){
+        return data.hashCode();
     }
 }
