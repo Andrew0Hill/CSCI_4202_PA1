@@ -1,3 +1,5 @@
+import sun.misc.*;
+
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -107,7 +109,60 @@ public class Player {
         }
     }
     public boolean playGameGraphSearch(Game g){
-return true;
+        considered_states = 0;
+        generated_states = 0;
+        previous_moves.clear();
+        previous_moves.add(g.start);
+
+        Node head = new Node(g.start);
+        head.depth = 0;
+        HashMap<Node,Integer> depth = new HashMap<>();
+        Deque<Node> unvisited = new ArrayDeque<>();
+        HashSet<Node> unvisited_set = new HashSet<>();
+        HashSet<Node> visited = new HashSet<>();
+        unvisited.add(head);
+        depth.put(head,0);
+        while(!unvisited.isEmpty()){
+            Node n = unvisited.remove();
+            visited.add(n);
+
+            if(n.data.equals(g.goal)){
+                System.out.println("Goal Found");
+                Stack<State> temp = new Stack<>();
+                while(n.parent != null){
+                    temp.add(n.data);
+                    n = n.parent;
+                }
+                while(!temp.isEmpty()){
+                    previous_moves.add(temp.pop());
+                }
+                return true;
+            }else{
+                ArrayList<Offset> moves = getApplicableMoves(n.data);
+
+                for(Offset o : moves){
+                    ++considered_states;
+                    State newState = executeMove(o,n.data);
+                    Node newNode = new Node(newState);
+                    newNode.parent = n;
+                    newNode.depth = n.depth+1;
+                    if(visited.contains(newNode) && depth.get(newNode) > newNode.depth){
+                        visited.remove(newNode);
+                    }
+                    if(unvisited_set.contains(newNode) && depth.get(newNode) > newNode.depth){
+                        unvisited.remove(newNode);
+                    }
+                    if(!unvisited_set.contains(newNode) && ! visited.contains(newNode)){
+                        ++generated_states;
+                        depth.put(newNode,newNode.depth);
+                        unvisited.add(newNode);
+                        unvisited_set.add(newNode);
+                    }
+
+                }
+            }
+        }
+        return false;
     }
 
     public boolean playGameA(Game g, iHeuristic heuristic){
@@ -150,17 +205,17 @@ return true;
                 State successor = executeMove(o,current.data);
                 Node tempNode = new Node(successor,current.depth+1,current);
                 tempNode.cost = tempNode.depth + heuristic.evaluate(tempNode.data,g.goal);
-
                 if(visited.contains(tempNode) && cost.get(tempNode) > tempNode.cost){
                     visited.remove(tempNode);
                 }
-                if(unvisited.contains(tempNode) && cost.get(tempNode) > tempNode.cost){
+                if(unvisited_set.contains(tempNode) && cost.get(tempNode) > tempNode.cost){
                     unvisited.remove(tempNode);
                 }
                 if(!visited.contains(tempNode) && !unvisited_set.contains(tempNode)){
                     ++generated_states;
                     cost.put(tempNode,tempNode.depth+heuristic.evaluate(tempNode.data,g.goal));
                     unvisited.add(tempNode);
+                    unvisited_set.add(tempNode);
                 }
             }
         }

@@ -65,7 +65,7 @@ public class Driver {
 
             Graph Search Start
              */
-/*            System.out.println("Beginning Graph Search:");
+            System.out.println("Beginning Graph Search:");
 
             System.out.println("Start:");
             p.printGameState(game.start);
@@ -81,11 +81,32 @@ public class Driver {
                 }
             } else {
                 System.out.println("Error: Solution not found.");
-            }*/
+            }
             /*
             Graph Search End
 
-            A* Search Begin
+            A* Search Begin (Heuristic #2)
+             */
+            System.out.println("Beginning A* Search:");
+            System.out.println("Start:");
+            p.printGameState(game.start);
+            System.out.println("Goal:");
+            p.printGameState(game.goal);
+
+            if (p.playGameA(game, Heuristics::h1)) {
+                System.out.println("Solution found in: " + (p.previous_moves.size() - 1) + " moves.");
+                System.out.println("Generated States: " + p.generated_states);
+                System.out.println("Considered States: " + p.considered_states);
+                for (State s : p.previous_moves) {
+                    p.printGameState(s);
+                }
+            } else {
+                System.out.println("Error: Solution not found.");
+            }
+            /*
+            A* Search (Heuristic #1) End
+
+            A* Search (Heuristic #2) Begin
              */
             System.out.println("Beginning A* Search:");
             System.out.println("Start:");
@@ -104,7 +125,7 @@ public class Driver {
                 System.out.println("Error: Solution not found.");
             }
             /*
-            A* Search End
+            A* Search (Heuristic #2) End
              */
             System.out.println(Heuristics.h2(game.start, game.goal));
         } catch (FileNotFoundException ex) {
